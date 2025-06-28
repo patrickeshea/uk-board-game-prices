@@ -370,7 +370,7 @@
                     type="text" 
                     id="gameSearch" 
                     class="search-input" 
-                    placeholder="Enter any board game name (e.g., Wingspan, Gloomhaven, Undergrove)..."
+                    placeholder="Enter any board game name (e.g., Wingspan, Gloomhaven, Monopoly)..."
                     autocomplete="off"
                 >
                 <button id="searchBtn" class="search-btn">Find Live Prices</button>
@@ -408,8 +408,8 @@
                         throw new Error('Backend not responding');
                     }
                 } catch (error) {
-                    this.statusDiv.innerHTML = '⚠️ Backend server not detected. Follow setup instructions to get live data.';
-                    this.statusDiv.style.color = '#e74c3c';
+                    this.statusDiv.innerHTML = '⚠️ Connecting to backend server...';
+                    this.statusDiv.style.color = '#e67e22';
                 }
             }
 
@@ -430,22 +430,12 @@
                 this.setLoading(true);
                 
                 try {
-                    // Check if we're running with the backend server
-                    const isLocalServer = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                    
-                    if (!isLocalServer) {
-                        // If not running locally, show demo message
-                        this.showError('This is the frontend-only version. To get live data, please set up the backend server using the instructions provided.');
-                        return;
-                    }
-                    
                     console.log(`Searching for: ${query}`);
                     const response = await fetch(`/api/search/${encodeURIComponent(query)}`);
                     
                     if (!response.ok) {
                         if (response.status === 404) {
-                            // Backend not running
-                            this.showError('Backend server not found. Make sure you\'re running "npm start" and accessing http://localhost:3000');
+                            this.showError('Game not found. Try a different name or check spelling.');
                             return;
                         }
                         
@@ -460,8 +450,8 @@
                 } catch (error) {
                     console.error('Search error:', error);
                     
-                    if (error.message.includes('fetch')) {
-                        this.showError('Cannot connect to backend server. Make sure you\'re running the Node.js server with "npm start" and accessing http://localhost:3000');
+                    if (error.message.includes('fetch') || error.message.includes('NetworkError')) {
+                        this.showError('Connection error. Please check your internet connection and try again.');
                     } else {
                         this.showError(`Search failed: ${error.message}`);
                     }
@@ -506,8 +496,8 @@
                                     <div class="price-breakdown">
                                         £${price.productPrice.toFixed(2)} ${shippingText}
                                     </div>
-                                    <button class="buy-btn" onclick="window.open('https://boardgameprices.co.uk/search?q=${encodeURIComponent(game.name)}', '_blank')">
-                                        View on BGP
+                                    <button class="buy-btn" onclick="window.open('${price.link || `https://boardgameprices.co.uk/search?q=${encodeURIComponent(game.name)}`}', '_blank')">
+                                        View Store
                                     </button>
                                 </div>
                             </div>
@@ -567,7 +557,7 @@
                                 <div class="source-icon">👤</div>
                                 BGG Marketplace
                             </div>
-                            <div class="no-results">No marketplace listings found in supported currencies</div>
+                            <div class="no-results">No marketplace listings found</div>
                         </div>
                     `;
                 }
