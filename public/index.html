@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UK Board Game Price Finder - Live</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        .live-badge {
+            display: inline-block;
+            background: #27ae60;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .search-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 2px solid #e9ecef;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 20px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .search-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 18px;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .results-section {
+            margin-top: 30px;
+        }
+
+        .source-section {
+            margin-bottom: 30px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid #e9ecef;
+        }
+
+        .source-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .source-icon {
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .price-grid {
+            display: grid;
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .price-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+
+        .store-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .store-name {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .store-details {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .price-info {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .total-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #27ae60;
+        }
+
+        .price-breakdown {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+
+        .buy-btn {
+            padding: 8px 16px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            margin-top: 5px;
+        }
+
+        .buy-btn:hover {
+            background: #229954;
+            transform: scale(1.05);
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 1px solid #fcc;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        .game-info {
+            background: #e8f4f8;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .game-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .game-meta {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+        }
+
+        .timestamp {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.85rem;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .search-form {
+                flex-direction: column;
+            }
+            
+            .search-input {
+                min-width: 100%;
+            }
+            
+            .price-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+        }
+
+        .connection-status {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 0.9rem;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .status-connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .attribution {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .attribution a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .attribution a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎲 UK Board Game Price Finder <span class="live-badge">LIVE</span></h1>
+            <p>Real-time prices from 60+ UK stores + BGG Marketplace</p>
+        </div>
+
+        <div class="search-section">
+            <div class="search-form">
+                <input 
+                    type="text" 
+                    id="gameSearch" 
+                    class="search-input" 
+                    placeholder="Enter any board game name (e.g., Wingspan, Gloomhaven, Undergrove)..."
+                    autocomplete="off"
+                >
+                <button id="searchBtn" class="search-btn">Find Live Prices</button>
+            </div>
+            <div id="connection-status" style="margin-top: 15px; text-align: center; font-size: 0.9rem; color: #7f8c8d;"></div>
+        </div>
+
+        <div id="results" class="results-section"></div>
+
+        <div class="attribution">
+            Live price data from <a href="https://boardgameprices.co.uk" target="_blank">BoardGamePrices.co.uk</a> 
+            and <a href="https://boardgamegeek.com" target="_blank">BoardGameGeek Marketplace</a>
+        </div>
+    </div>
+
+    <script>
+        class LiveBoardGamePriceFinder {
+            constructor() {
+                this.searchInput = document.getElementById('gameSearch');
+                this.searchBtn = document.getElementById('searchBtn');
+                this.resultsDiv = document.getElementById('results');
+                this.statusDiv = document.getElementById('connection-status');
+                
+                this.setupEventListeners();
+                this.checkBackendConnection();
+            }
+
+            async checkBackendConnection() {
+                try {
+                    const response = await fetch('/api/health');
+                    if (response.ok) {
+                        this.statusDiv.innerHTML = '✅ Connected to live backend server';
+                        this.statusDiv.style.color = '#27ae60';
+                    } else {
+                        throw new Error('Backend not responding');
+                    }
+                } catch (error) {
+                    this.statusDiv.innerHTML = '⚠️ Backend server not detected. Follow setup instructions to get live data.';
+                    this.statusDiv.style.color = '#e74c3c';
+                }
+            }
+
+            setupEventListeners() {
+                this.searchBtn.addEventListener('click', () => this.searchPrices());
+                this.searchInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.searchPrices();
+                });
+            }
+
+            async searchPrices() {
+                const query = this.searchInput.value.trim();
+                if (!query) {
+                    this.showError('Please enter a game name to search');
+                    return;
+                }
+
+                this.setLoading(true);
+                
+                try {
+                    // Check if we're running with the backend server
+                    const isLocalServer = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                    
+                    if (!isLocalServer) {
+                        // If not running locally, show demo message
+                        this.showError('This is the frontend-only version. To get live data, please set up the backend server using the instructions provided.');
+                        return;
+                    }
+                    
+                    console.log(`Searching for: ${query}`);
+                    const response = await fetch(`/api/search/${encodeURIComponent(query)}`);
+                    
+                    if (!response.ok) {
+                        if (response.status === 404) {
+                            // Backend not running
+                            this.showError('Backend server not found. Make sure you\'re running "npm start" and accessing http://localhost:3000');
+                            return;
+                        }
+                        
+                        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                        throw new Error(errorData.error || `Server returned ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('Received data:', data);
+                    this.displayResults(data);
+                    
+                } catch (error) {
+                    console.error('Search error:', error);
+                    
+                    if (error.message.includes('fetch')) {
+                        this.showError('Cannot connect to backend server. Make sure you\'re running the Node.js server with "npm start" and accessing http://localhost:3000');
+                    } else {
+                        this.showError(`Search failed: ${error.message}`);
+                    }
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+
+            displayResults(data) {
+                const { game, retailPrices, marketplacePrices, timestamp } = data;
+                
+                let html = `
+                    <div class="game-info">
+                        <div class="game-title">${game.name}</div>
+                        <div class="game-meta">BGG ID: ${game.id} • Year: ${game.year}</div>
+                    </div>
+                `;
+
+                // Display retail prices
+                if (retailPrices && retailPrices.length > 0) {
+                    html += `
+                        <div class="source-section">
+                            <div class="source-header">
+                                <div class="source-icon">🏪</div>
+                                UK Retail Stores (${retailPrices.length} offers)
+                            </div>
+                            <div class="price-grid">
+                    `;
+                    
+                    retailPrices.forEach((price, index) => {
+                        const stockText = price.inStock ? '✅ In Stock' : '❌ Out of Stock';
+                        const shippingText = price.shipping > 0 ? `+ £${price.shipping.toFixed(2)} shipping` : 'Free shipping';
+                        
+                        html += `
+                            <div class="price-item">
+                                <div class="store-info">
+                                    <div class="store-name">UK Store #${index + 1}</div>
+                                    <div class="store-details">${stockText} • ${price.country || 'UK'}</div>
+                                </div>
+                                <div class="price-info">
+                                    <div class="total-price">£${price.price.toFixed(2)}</div>
+                                    <div class="price-breakdown">
+                                        £${price.productPrice.toFixed(2)} ${shippingText}
+                                    </div>
+                                    <button class="buy-btn" onclick="window.open('https://boardgameprices.co.uk/search?q=${encodeURIComponent(game.name)}', '_blank')">
+                                        View on BGP
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `</div></div>`;
+                } else {
+                    html += `
+                        <div class="source-section">
+                            <div class="source-header">
+                                <div class="source-icon">🏪</div>
+                                UK Retail Stores
+                            </div>
+                            <div class="no-results">No retail prices found for this game</div>
+                        </div>
+                    `;
+                }
+
+                // Display marketplace prices
+                if (marketplacePrices && marketplacePrices.length > 0) {
+                    html += `
+                        <div class="source-section">
+                            <div class="source-header">
+                                <div class="source-icon">👤</div>
+                                BGG Marketplace (${marketplacePrices.length} listings)
+                            </div>
+                            <div class="price-grid">
+                    `;
+                    
+                    marketplacePrices.forEach(price => {
+                        const currencyNote = price.originalCurrency !== 'GBP' ? ` (${price.originalPrice.toFixed(2)} ${price.originalCurrency})` : '';
+                        html += `
+                            <div class="price-item">
+                                <div class="store-info">
+                                    <div class="store-name">BGG User Sale</div>
+                                    <div class="store-details">
+                                        ${price.condition}${price.notes ? ` • ${price.notes}` : ''}
+                                    </div>
+                                </div>
+                                <div class="price-info">
+                                    <div class="total-price">£${price.price.toFixed(2)}</div>
+                                    <div class="price-breakdown">User sale${currencyNote}</div>
+                                    <button class="buy-btn" onclick="window.open('https://boardgamegeek.com/boardgame/${game.id}', '_blank')">
+                                        View on BGG
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `</div></div>`;
+                } else {
+                    html += `
+                        <div class="source-section">
+                            <div class="source-header">
+                                <div class="source-icon">👤</div>
+                                BGG Marketplace
+                            </div>
+                            <div class="no-results">No marketplace listings found in supported currencies</div>
+                        </div>
+                    `;
+                }
+
+                // Add timestamp
+                html += `<div class="timestamp">Last updated: ${new Date(timestamp).toLocaleString()}</div>`;
+
+                this.resultsDiv.innerHTML = html;
+            }
+
+            showError(message) {
+                this.resultsDiv.innerHTML = `<div class="error">${message}</div>`;
+            }
+
+            setLoading(isLoading) {
+                if (isLoading) {
+                    this.searchBtn.disabled = true;
+                    this.searchBtn.textContent = 'Searching...';
+                    this.resultsDiv.innerHTML = '<div class="loading">Searching live prices</div>';
+                } else {
+                    this.searchBtn.disabled = false;
+                    this.searchBtn.textContent = 'Find Live Prices';
+                }
+            }
+        }
+
+        // Initialize the app when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new LiveBoardGamePriceFinder();
+        });
+    </script>
+</body>
+</html>

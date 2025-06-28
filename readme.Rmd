@@ -1,0 +1,28 @@
+
+---
+title: "UK Board Game Price Finder"
+output: github_document
+---
+
+
+
+A web application that compares board game prices from UK retailers and BoardGameGeek marketplace.
+
+## Features
+- Search any board game by name
+- Compare prices from 60+ UK stores
+- Show BGG marketplace listings (UK only)
+- Filter out out-of-stock items
+- Real-time price data
+
+## How to Use
+1. Visit the website
+2. Enter any board game name
+3. View prices from UK retailers and BGG marketplace
+4. Click "View" buttons to purchase
+
+## Technologies Used
+- Node.js + Express backend
+- BoardGameGeek XML API
+- BoardGamePrices.co.uk API
+- Vanilla JavaScript frontend
